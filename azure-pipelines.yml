@@ -89,15 +89,17 @@ jobs:
   displayName: "Dist Linux binary"
   steps:
     - template: ci/azure-install-rust.yml
-    - script: rustup target add x86_64-unknown-linux-gnu
+    - script: rustup target add x86_64-unknown-linux-musl
     - script: |
         sudo apt update -y
+        sudo apt install musl-tools -y
+      displayName: "Install musl-tools"
     - script: |
         set -ex
-        cargo build --target x86_64-unknown-linux-gnu --release
+        cargo build --target x86_64-unknown-linux-musl --release
     - template: ci/azure-create-release-build.yml
       parameters:
-        artifacts: target/x86_64-unknown-linux-gnu/release
+        artifacts: target/x86_64-unknown-linux-musl/release
         name: dist_linux
 
 - job: deploy
@@ -128,7 +130,7 @@ jobs:
           mkdir -p tmp/$name
           cp README.md \
             LICENSE.md \
-            tmp/$src/dist_$src/boringtun \
+            tmp/$src/boringtun \
             tmp/$name/
           chmod +x tmp/$name/boringtun*
           tar czvf gh-release/$name.tar.gz -C tmp $name
